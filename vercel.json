@@ -1,0 +1,5 @@
+{
+  "$schema": "openapi.vercel.sh/vercel.json",
+  "buildCommand": "",
+  "outputDirectory": "."
+}
