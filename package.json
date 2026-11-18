@@ -1,0 +1,13 @@
+{
+  "name": "mohpw-case-monitoring-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Frontend demo for the MoHPW Operation & Monitoring System for Cases",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node server.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
