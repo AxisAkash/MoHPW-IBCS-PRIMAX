@@ -34,20 +34,52 @@ Desktop uses persistent left navigation and a compact top bar with global search
 ## 3. Design tokens
 
 ```text
-Navy       #0F2A43   identity, navigation, headings
-Blue       #1D4ED8   primary actions, links, focus rings
-Teal       #0F766E   selected states, supporting highlights
-Canvas     #F5F7FA   page background
-Surface    #FFFFFF   cards, tables, forms
-Border     #D6DCE4   dividers and input outlines
-Text       #17202A   primary text
-Muted      #667085   secondary text
-Success    #15803D   completed / verified
-Warning    #B45309   due soon / attention
-Danger     #B42318   overdue / error / destructive
+Identity
+Navy          #102A43   sidebar, login panel, headings
+Navy 2        #173D5C   active navigation surface
+Navy 3        #0B1F33   overlay scrim base
+Blue          #2563EB   primary actions, links, focus
+Blue dark     #1D4ED8   primary action hover
+Blue soft     #E8F0FE   hover / highlighted surfaces
+Teal          #0F766E   selected accents, notes, success-adjacent cues
+Teal soft     #E3F4F1   note and demo-label backgrounds
+
+Neutral
+Canvas        #F4F7FA   page background
+Surface       #FFFFFF   panels, tables, forms, cards
+Surface alt   #F1F5F9   toolbars, filters, subtle fills
+Surface hover #F8FAFC   row and control hover
+Border        #D9E2EC   dividers and card borders
+Border strong #B8C6D4   emphasis borders, input hover
+Control border#7D8B9A   form-control outlines; >=3:1 on white and canvas
+Text          #162331   primary text
+Muted         #5E6B7A   secondary text; >=5:1 on white
+Muted 2       #6B7887   tertiary text
+
+Status
+Success       #15803D / bg #E9F7EE / border #B7E2C4
+Warning       #B45309 / bg #FFF6E5 / border #F0D49B
+Danger        #B42318 / bg #FEF0EE / border #EFB9B3
+Info          #1D4ED8 / bg #EDF3FF / border #C4D6FB
+Neutral       #4E5D6C / bg #F1F5F9 / border #D9E2EC
+
+Chart
+Primary       #2563EB   registered series
+Secondary     #9AB9EC   closed series
+Tertiary      #91A7BF   distribution segment
+Quaternary    #D6DCE4   distribution remainder
 ```
 
-Typography uses a system sans stack with `Noto Sans Bengali` first for Bangla fallback. Spacing is 4px-based. Surfaces use 6–10px corners, not decorative pills. Shadows are reserved for the login card and modal. Focus ring is a 3px blue outline with a 2px white offset.
+Font stack: `Inter` (400–800) with `Noto Sans Bengali` (400–800) for Bangla, then `Segoe UI`, Arial, sans-serif. Both families are requested from Google Fonts with `display=swap` and preconnects; the sandbox has no access to that host, so web-font rendering is not verified there.
+
+Type scale: 11 / 12 / 13 / 14 / 16 / 18px. No body text is smaller than 11px.
+Spacing scale: 4 / 8 / 12 / 16 / 20 / 24 / 32 / 40 / 48px.
+Radius scale: 4 / 6 / 10 / 14px. Pills are used only for status dots, the brand mark is 6px, and panels are 10px.
+Elevation scale: `xs` (1px hairline), `sm` (2px subtle), `md` (8px floating), `lg` (18px overlay). Panels, metric cards, and workflow cards carry a subtle `xs` shadow; the login card and dialogs use `lg`, toasts use `md`, and the mobile drawer uses `lg`.
+
+Focus treatment: a 2px solid outline with a 2px offset on every keyboard-focused control; inputs additionally receive a 4px soft halo. Horizontal scroll containers reserve padding so the ring is not clipped.
+
+Motion: `fast` 120ms and `base` 180ms, both eased, applied only to hover/transition states; all animation collapses under `prefers-reduced-motion`.
 
 ## 4. Component inventory
 
@@ -59,7 +91,13 @@ Every page uses a centered, fluid content frame with a page header and one or mo
 
 ## 6. Responsive behavior
 
-At 1100px the left rail narrows and multi-column grids reduce. At 820px the rail becomes a drawer and page headers wrap. At 640px tables become horizontally scrollable with sticky first columns or switch to stacked cards where the content is more readable. Filter panels become an explicit “Filters” drawer. Touch targets remain at least 44px high. Mobile keeps the case ID, title, status, priority, next deadline, and primary action visible first.
+- **1520px and below:** the last table column (Action / Preview) is pinned to the right edge with a soft inset shadow so row actions stay reachable while the wide table scrolls.
+- **1280px and below:** the five-card metric row becomes three columns and dashboard chart rows stack into a single column.
+- **1180px and below:** the persistent rail narrows to 214px, content padding drops to 22px, and the filter grid becomes three columns with the search field spanning the row.
+- **820px and below:** the rail becomes an off-canvas drawer (z-index 40) with a scrim (z-index 39) above the bottom navigation (z-index 25). The top bar stays sticky, page headers wrap, the settings navigation scrolls horizontally, forms become single-column, and case detail stacks into one column. Buttons, pagination, tabs, navigation items, and inputs use 44px touch targets; input text is 16px to avoid mobile zoom. The drawer stops above the bottom navigation so its footer is never clipped, and toasts are raised above it. Safe-area insets are applied to content, drawer footer, bottom navigation, and toasts.
+- **560px and below:** the compact language switch replaces the toggle, metrics and filters become two columns, head actions wrap below the title, timelines reflow to two columns, review rows and notifications stack, and the case header tightens.
+
+Tables stay horizontally scrollable at narrow widths rather than switching to cards. The case register keeps the case ID, title, status, priority, next deadline, and row action visible within the scrollable table.
 
 ## 7. Role-based visibility
 
@@ -103,12 +141,13 @@ All values are fictional and visibly labeled as demonstration data.
 
 ## 10. Accessibility checks
 
-- Semantic landmarks: banner, navigation, main, footer, dialog.
-- All form controls have visible labels and inline error text.
-- Keyboard focus is visible and never removed; skip link is available.
-- Status is conveyed with text plus a visual treatment, never color alone.
-- Table headers use `scope=col`; selection controls expose accessible names.
-- Dialogs have a labelled title, close button, and Escape support.
-- Motion is minimal and honors `prefers-reduced-motion`.
-- Contrast is designed around WCAG 2.1 AA targets; muted text remains above 4.5:1 on white where used for body copy.
-- Layout remains usable at 200% zoom and on narrow widths without hiding primary actions.
+- Semantic landmarks are used: a banner header, navigation aside, main content region, dialog role, and a skip link to the application root.
+- Form controls have visible labels; required fields and validation errors are shown in text, and invalid controls get a danger border and background.
+- Keyboard focus is never removed: a 2px outline with 2px offset is applied globally, inputs add a 4px halo, and horizontally scrollable containers reserve padding so rings are not clipped. Dialogs autofocus their close button and return focus to the trigger on close.
+- Status is conveyed with text plus a badge treatment, never color alone. Priority is written out as a word.
+- Table headers are `<th>` elements with ghost-style sort buttons; selection checkboxes expose an aria-label containing the case ID.
+- Dialogs have a labelled title, a close button, Escape support, and a scrim that closes on click.
+- Motion is limited to short hover/transition states and honors `prefers-reduced-motion`.
+- Contrast targets WCAG 2.1 AA: primary text `#162331`, muted `#5E6B7A` (about 5.4:1 on white), and form-control borders `#7D8B9A` (about 3.5:1 on white) exceed the 3:1 non-text threshold. No body text is below 11px.
+- Mobile controls are at least 44px tall and form inputs use 16px text; the drawer footer clears the bottom navigation; toasts do not cover it.
+- The page has no horizontal overflow at 375, 390, 430, 768, 1024, 1366, or 1920px; tables scroll inside their own containers. Layout remains usable at 200% zoom without hiding primary actions.
